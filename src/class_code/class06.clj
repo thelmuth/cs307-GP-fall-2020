@@ -91,25 +91,25 @@
   (map inc nums)
 
   (map str nums)
-  
+
   (map (fn [x] (* x 5))
        nums)
-  
+
   (map str
        nums
        '("a" "b" "c" "d")
        (range))
-  
+
   (map (fn [x]
          [(* x 5) (str x)])
        nums)
-  
+
   ;; special form of anonymous function
   (map #(* % 5)
        nums)
-  
+
   (#(+ %1 %2) 100 5)
-  
+
   (map count
        '("what" "is" "this"))
   
