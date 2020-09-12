@@ -115,22 +115,47 @@
     ([x] x)
     ([x y] (+ x y))
     ([x y & the-rest] (str x y the-rest)))
-  
+
   (our-plus)
   (our-plus 5)
   (our-plus 6 7)
   (our-plus 1 2 3 4 5 6)
-  
-  
+
+
   ;; lazy-seq: a more general construction of lazy/infinite seqs
 
   (defn even-numbers
     ([] (even-numbers 0))
     ([n] (lazy-seq (cons n
                          (even-numbers (+ n 2))))))
-  
+
   (take 10 (even-numbers))
+
+  (take 7 "asdashjkdhjksahjdksajhkd")
+
+  ;;; Triangle numbers
+  ;;; *      1
+  ;;; **     3
+  ;;; ***    6
+  ;;; ****   10
+  ;;; *****  15
+  ;;; 
+  ;;; t(n) = t(n - 1) + n
+
+  (defn triangle-numbers
+    "Returns an infinite sequence of triangle numbers.
+     Not easy to use iterate here, since we need to know t(n-1) AND n"
+    ([]
+     (triangle-numbers 1 0))
+    ([n tn-1]
+     (let [next-number (+ tn-1 n)]
+       (lazy-seq (cons next-number
+                       (triangle-numbers (inc n)
+                                         next-number))))))
   
+  (take 20 (triangle-numbers))
+  
+  (take 20 (reductions + (range)))
   
   
   )
