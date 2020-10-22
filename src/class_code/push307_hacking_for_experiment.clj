@@ -266,11 +266,17 @@
 
 (defn sampling-alg-1
   "Implements sampling alg 1 from paper"
-  [instructions program-length number-iterations]
+  [instructions program-length number-iterations original-inputs]
   (loop [programs-so-far #{}
          traces-so-far #{}
          semantics-so-far #{}
          iteration 0]
+    (when (zero? (mod iteration 2000000))
+      (println (format "%d,%d,%d,%d"
+                       iteration
+                       (count programs-so-far)
+                       (count traces-so-far)
+                       (count semantics-so-far))))
     (if (>= iteration number-iterations)
       {:programs programs-so-far
        :traces traces-so-far
@@ -278,17 +284,15 @@
       (let [new-program (make-random-linear-push-program instructions program-length)]
         (if (contains? programs-so-far new-program)
           (recur programs-so-far traces-so-far semantics-so-far iteration)
-          (let [traces (trace-program-on-inputs new-program)
+          (let [traces (if original-inputs
+                         (trace-program-on-inputs new-program)
+                         (trace-program-on-inputs-different new-program))
                 semantics (map first traces)]
             (if (is-trivial? semantics)
-              (do
-                ;; (println "This is a trival program and semantics")
-                ;; (println new-program)
-                ;; (println semantics)
-                (recur programs-so-far
-                       traces-so-far
-                       semantics-so-far
-                       (inc iteration)))
+              (recur programs-so-far
+                     traces-so-far
+                     semantics-so-far
+                     (inc iteration))
               (recur (conj programs-so-far new-program)
                      (conj traces-so-far traces)
                      (conj semantics-so-far semantics)
@@ -296,14 +300,30 @@
 
 (defn gather-data-from-sampling-alg-1
   "Does what the name suggests"
-  [instructions program-length number-iterations]
-  (let [results (sampling-alg-1 instructions program-length number-iterations)
+  [instructions program-length number-iterations original-inputs]
+  (println "iteration,programs,traces,semantics")
+  (let [results (sampling-alg-1 instructions program-length number-iterations original-inputs)
         num-programs (count (:programs results))
         num-traces (count (:traces results))
         num-semantics (count (:semantics results))]
+    (println)
     (println "Number of programs:" num-programs)
     (println "Number of traces:  " num-traces)
     (println "Number of semantics:" num-semantics)))
+
+
+(defn -main
+  "Main running of the program
+   args: program-length
+         number-iterations
+         use-original-inputs (true, and if false, our new inputs)"
+  [& args]
+  (binding [*ns* (the-ns 'class-code.push307-hacking-for-experiment)]
+    (println "Command line args:" (apply str (interpose \space args)))
+    (gather-data-from-sampling-alg-1 default-instructions
+                                     (read-string (first args))
+                                     (read-string (second args))
+                                     (read-string (nth args 2)))))
 
 
 (comment
