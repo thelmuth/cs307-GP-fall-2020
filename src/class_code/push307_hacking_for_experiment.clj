@@ -3,7 +3,7 @@
 
 (def default-instructions
   (list
-   'in1
+  ;;  'in1
    'integer_+
    'integer_-
    'integer_*
@@ -12,7 +12,7 @@
    'integer_neg
    'integer_swap
   ;;  'ERC
-  ;;  'integer_pop
+   'integer_pop
    ))
 
 ;; EXPERIMENTS
@@ -282,7 +282,7 @@
        :traces traces-so-far
        :semantics semantics-so-far}
       (let [new-program (make-random-linear-push-program instructions program-length)]
-        (if (contains? programs-so-far new-program)
+        (if (contains? programs-so-far (hash new-program))
           (recur programs-so-far traces-so-far semantics-so-far iteration)
           (let [traces (if original-inputs
                          (trace-program-on-inputs new-program)
@@ -293,9 +293,9 @@
                      traces-so-far
                      semantics-so-far
                      (inc iteration))
-              (recur (conj programs-so-far new-program)
-                     (conj traces-so-far traces)
-                     (conj semantics-so-far semantics)
+              (recur (conj programs-so-far (hash new-program))
+                     (conj traces-so-far (hash traces))
+                     (conj semantics-so-far (hash semantics))
                      (inc iteration)))))))))
 
 (defn gather-data-from-sampling-alg-1
@@ -336,6 +336,8 @@
                                    5)]
     (println program)
     #_(interpret-program program start-state (count program))
+    (println (hash program))
+    (println (hash (trace-program-on-inputs program)))
     (trace-program-on-inputs program)
     )
 
@@ -354,11 +356,13 @@
   
   (some empty? '((2 3 4) (1) (5 3)))
   
-  (sampling-alg-1 default-instructions 10 5)
+  (gather-data-from-sampling-alg-1 default-instructions 10 100 true)
   
   
-  (time (gather-data-from-sampling-alg-1 default-instructions 50 1000))
+  (time (gather-data-from-sampling-alg-1 default-instructions 10 1000 true))
   
   (rand-int 2)
+  
+  
   
   )
